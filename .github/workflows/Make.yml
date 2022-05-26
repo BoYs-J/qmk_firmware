@@ -1,33 +1,31 @@
 name: Make
 
 on:
-  push:
-    branches:
-    - master
-    - develop
-  pull_request:
-    paths:
-    - 'builddefs/**'
-    - 'quantum/**'
-    - 'platforms/**'
-    - 'tmk_core/**'
-    - 'tests/**'
-    - '*.mk'
-    - 'Makefile'
-    - '.github/workflows/unit_test.yml'
+  workflow_dispatch:
 
 jobs:
-  test:
+  build:
+    name: Build keyboard
     runs-on: ubuntu-latest
 
-    container: qmkfm/base_container
-
     steps:
-    - uses: actions/checkout@v2
+    - name: Get source
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: Install Tools
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install python3-pip python3-setuptools
+        sudo pip3 install --upgrade pip
+        sudo python3 -m pip install --user qmk
+        sudo echo 'PATH="$HOME/.local/bin:$PATH"' >> $HOME/.bashrc && source $HOME/.bashrc
+        sudo qmk setup
 
-    - name: Run tests
-      run: make cx60:default
 
+    - name: Make
+      run: |
+        make cx60:default
 
     - name: Upload Artifact Files
       uses: actions/upload-artifact@v2
