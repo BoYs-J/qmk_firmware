@@ -1,32 +1,34 @@
-name: Build ALL 
+name: Make
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+    - master
+    - develop
+  pull_request:
+    paths:
+    - 'builddefs/**'
+    - 'quantum/**'
+    - 'platforms/**'
+    - 'tmk_core/**'
+    - 'tests/**'
+    - '*.mk'
+    - 'Makefile'
+    - '.github/workflows/unit_test.yml'
 
 jobs:
-  build:
-    name: Build all keyboard
+  test:
     runs-on: ubuntu-latest
 
-    steps:
-    - name: Get source
-      uses: actions/checkout@v2
-      with:
-        submodules: recursive
-    - name: Install Tools
-      run: |
-        sudo apt-get update
-        sudo apt-get -y install python3-pip git python3
-        sudo pip3 install --upgrade pip
-        sudo python3 -m pip install --user qmk
-        sudo echo 'PATH="$HOME/.local/bin:$PATH"' >> $HOME/.bashrc && source $HOME/.bashrc
+    container: qmkfm/base_container
 
-    - name: Make
-      run: |
-        make cx60:default
-    - name: Upload Artifact Files
-      uses: actions/upload-artifact@v2
-      with: |
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Run tests
+      run: make cx60:default
+
+      with: 
         name: Keyboard_Firmware
         path: |
 #          /home/runner/work/qmk_firmware/qmk_firmware/.build/*.zip
