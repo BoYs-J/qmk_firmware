@@ -28,6 +28,9 @@ jobs:
     - name: Run tests
       run: make cx60:default
 
+
+    - name: Upload Artifact Files
+      uses: actions/upload-artifact@v2
       with: 
         name: Keyboard_Firmware
         path: |
